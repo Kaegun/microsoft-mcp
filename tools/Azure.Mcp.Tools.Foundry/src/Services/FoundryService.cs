@@ -276,7 +276,7 @@ public class FoundryService(
         return modelsList;
     }
 
-    public async Task<List<ModelDeployment>> ListDeployments(
+    public async Task<List<AIProjectDeployment>> ListDeployments(
         string endpoint,
         string? tenantId = null,
         RetryPolicyOptions? retryPolicy = null,
@@ -288,9 +288,9 @@ public class FoundryService(
         try
         {
             var projectClient = await CreateAIProjectClientWithAuth(endpoint, tenantId, cancellationToken);
-            var deploymentsClient = projectClient.GetDeploymentsClient();
+            var deploymentsClient = projectClient.Deployments;
 
-            var deployments = new List<ModelDeployment>();
+            var deployments = new List<AIProjectDeployment>();
             await foreach (var deployment in deploymentsClient.GetDeploymentsAsync(cancellationToken: cancellationToken))
             {
                 deployments.Add(deployment);
@@ -409,10 +409,10 @@ public class FoundryService(
         try
         {
             var projectClient = await CreateAIProjectClientWithAuth(endpoint, tenantId, cancellationToken);
-            var indexesClient = projectClient.GetIndexesClient();
+            var indexesClient = projectClient.Indexes;
 
             var indexes = new List<KnowledgeIndexInformation>();
-            await foreach (var index in indexesClient.GetIndicesAsync(cancellationToken))
+            await foreach (var index in indexesClient.GetIndexesAsync(cancellationToken))
             {
                 // Determine the type based on the actual type of the index
                 string indexType = index switch
@@ -459,10 +459,10 @@ public class FoundryService(
         try
         {
             var projectClient = await CreateAIProjectClientWithAuth(endpoint, tenantId, cancellationToken);
-            var indexesClient = projectClient.GetIndexesClient();
+            var indexesClient = projectClient.Indexes;
 
             // Find the index by name using async enumerable
-            var index = await indexesClient.GetIndicesAsync(cancellationToken: cancellationToken)
+            var index = await indexesClient.GetIndexesAsync(cancellationToken: cancellationToken)
                 .Where(i => string.Equals(i.Name, indexName, StringComparison.OrdinalIgnoreCase))
                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
@@ -919,11 +919,10 @@ public class FoundryService(
         CancellationToken cancellationToken = default)
     {
         var credential = await GetCredential(tenant, cancellationToken);
-        var transport = CreateTransport();
 
         var clientOptions = new AIProjectClientOptions
         {
-            Transport = transport
+            Transport = CreatePipelineTransport()
         };
 
         return new AIProjectClient(new Uri(endpoint), credential, clientOptions);
@@ -935,18 +934,17 @@ public class FoundryService(
         CancellationToken cancellationToken = default)
     {
         var credential = await GetCredential(tenant, cancellationToken);
-        var transport = CreateTransport();
 
         var projectClientOptions = new AIProjectClientOptions
         {
-            Transport = transport
+            Transport = CreatePipelineTransport()
         };
 
         var projectClient = new AIProjectClient(new Uri(endpoint), credential, projectClientOptions);
 
         var agentsClientOptions = new PersistentAgentsAdministrationClientOptions
         {
-            Transport = transport
+            Transport = new HttpClientTransport(_httpClientFactory.CreateClient())
         };
 
         var agentsClient = new PersistentAgentsClient(endpoint, credential, agentsClientOptions);
@@ -954,12 +952,9 @@ public class FoundryService(
         return (projectClient, agentsClient);
     }
 
-    private HttpClientTransport CreateTransport()
+    private HttpClientPipelineTransport CreatePipelineTransport()
     {
-        var httpClient = _httpClientFactory.CreateClient();
-        var transport = new HttpClientTransport(httpClient);
-
-        return transport;
+        return new HttpClientPipelineTransport(_httpClientFactory.CreateClient());
     }
 
     public async Task<List<PersistentAgent>> ListAgents(
@@ -1011,7 +1006,7 @@ public class FoundryService(
         var (projectClient, agentsClient) = await CreateAIProjectAndPersistentAgentsClientsAsync(projectEndpoint, tenantId, cancellationToken);
 
         // Validate if the model deployment exists
-        var deploymentsClient = projectClient.GetDeploymentsClient();
+        var deploymentsClient = projectClient.Deployments;
         try
         {
             await deploymentsClient.GetDeploymentAsync(modelDeploymentName, cancellationToken: cancellationToken);

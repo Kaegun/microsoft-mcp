@@ -82,5 +82,5 @@ public sealed class DeploymentsListCommand : GlobalCommand<DeploymentsListOption
         return context.Response;
     }
 
-    internal record DeploymentsListCommandResult(IEnumerable<ModelDeployment> Deployments);
+    internal record DeploymentsListCommandResult(IEnumerable<AIProjectDeployment> Deployments);
 }

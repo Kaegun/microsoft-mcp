@@ -33,10 +33,10 @@ public class DeploymentsListCommandTests
     public async Task ExecuteAsync_ReturnsDeployments_WhenDeploymentsExist()
     {
         var endpoint = "https://test-endpoint.com";
-        var expectedDeployments = new List<Deployment>
+        var expectedDeployments = new List<AIProjectDeployment>
         {
-            AIProjectsModelFactory.Deployment("type", "deployment1"),
-            AIProjectsModelFactory.Deployment("type", "deployment2"),
+            AzureAIProjectsModelFactory.AIProjectDeployment("type", "deployment1"),
+            AzureAIProjectsModelFactory.AIProjectDeployment("type", "deployment2"),
         };
 
         _foundryService.ListDeployments(
