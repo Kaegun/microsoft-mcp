@@ -329,7 +329,7 @@ public sealed class AksService(
                 OutboundType = data.NetworkProfile?.OutboundType?.ToString(),
                 PodCidrs = data.NetworkProfile?.PodCidrs?.ToList(),
                 ServiceCidrs = data.NetworkProfile?.ServiceCidrs?.ToList(),
-                IpFamilies = data.NetworkProfile?.IPFamilies?.Select(f => f.ToString()).ToList()
+                IpFamilies = data.NetworkProfile?.NetworkIPFamilies?.Select(f => f.ToString()).ToList()
             },
             WindowsProfile = data.WindowsProfile is null ? null : new() { AdminUsername = data.WindowsProfile.AdminUsername },
             ServicePrincipalProfile = data.ServicePrincipalProfile is null ? null : new() { ClientId = data.ServicePrincipalProfile.ClientId },

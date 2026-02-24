@@ -36,6 +36,7 @@
     <OutputType>Exe</OutputType>
     <AssemblyName>$(CliName)</AssemblyName>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
     <!-- Publishing settings -->
     <IsAotCompatible>true</IsAotCompatible>
     <PublishSingleFile>false</PublishSingleFile>
@@ -91,4 +92,9 @@
     <None Include="..\docs\e2eTestPrompts.md" />
     <None Include="..\docs\new-command.md" />
   </ItemGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;D:\Dev\1099\Aria\Code\copyBuildOutput.ps1&quot; $(Configuration) &quot;$(ProjectDir)$(OutDir)*.*&quot; &quot;D:\Dev\1099\Aria\MCP-Servers\MS\Azure&quot; -IncludeSubdirectories" Condition="'$(OS)' == 'Windows_NT'" />
+    <Exec Command="pwsh -ExecutionPolicy Bypass -File &quot;D:/Dev/1099/Aria/Code/copyBuildOutput.ps1&quot; $(Configuration) &quot;$(ProjectDir)$(OutDir)*.*&quot; &quot;/mnt/d/Dev/1099/Aria/MCP-Servers/MS/Azure&quot; -IncludeSubdirectories" Condition="'$(OS)' != 'Windows_NT'" />
+  </Target>
+
 </Project>

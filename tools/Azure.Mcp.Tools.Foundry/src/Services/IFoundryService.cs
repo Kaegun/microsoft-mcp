@@ -22,7 +22,7 @@ public interface IFoundryService
         CancellationToken cancellationToken = default
     );
 
-    Task<List<Deployment>> ListDeployments(
+    Task<List<ModelDeployment>> ListDeployments(
         string endpoint,
         string? tenantId = null,
         RetryPolicyOptions? retryPolicy = null,

@@ -276,7 +276,7 @@ public class FoundryService(
         return modelsList;
     }
 
-    public async Task<List<Deployment>> ListDeployments(
+    public async Task<List<ModelDeployment>> ListDeployments(
         string endpoint,
         string? tenantId = null,
         RetryPolicyOptions? retryPolicy = null,
@@ -290,7 +290,7 @@ public class FoundryService(
             var projectClient = await CreateAIProjectClientWithAuth(endpoint, tenantId, cancellationToken);
             var deploymentsClient = projectClient.GetDeploymentsClient();
 
-            var deployments = new List<Deployment>();
+            var deployments = new List<ModelDeployment>();
             await foreach (var deployment in deploymentsClient.GetDeploymentsAsync(cancellationToken: cancellationToken))
             {
                 deployments.Add(deployment);
@@ -419,7 +419,7 @@ public class FoundryService(
                 {
                     AzureAISearchIndex => "AzureAISearchIndex",
                     ManagedAzureAISearchIndex => "ManagedAzureAISearchIndex",
-                    CosmosDBIndex => "CosmosDBIndex",
+                    AIProjectCosmosDBIndex => "CosmosDBIndex",
                     _ => index.GetType().Name
                 };
 
@@ -476,7 +476,7 @@ public class FoundryService(
             {
                 AzureAISearchIndex => "AzureAISearchIndex",
                 ManagedAzureAISearchIndex => "ManagedAzureAISearchIndex",
-                CosmosDBIndex => "CosmosDBIndex",
+                AIProjectCosmosDBIndex => "CosmosDBIndex",
                 _ => index.GetType().Name
             };
 
